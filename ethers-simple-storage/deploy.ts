@@ -1,18 +1,19 @@
 import { ethers } from 'ethers';
 import fs from 'fs-extra';
+import 'dotenv/config';
 
 const main = async () => {
   console.log('running main');
 
-  const provider = new ethers.providers.JsonRpcProvider( // connection to a blockchain
-    'http://172.28.80.1:7545'
-  );
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL); // connection to a blockchain
+  const encryptedJson = fs.readFileSync('./.encryptedKey.json', 'utf8'); // must run encrypted key to get this
 
   // Need abi, binary and wallet to set up contract factory
-  const wallet = new ethers.Wallet(
-    '0xa04a0ffaf287ee5d591b1f7a41c10470c4b7872ba884f980288425edfe2d43e7', // private key
-    provider
+  let wallet: ethers.Wallet = ethers.Wallet.fromEncryptedJsonSync(
+    encryptedJson,
+    process.env.PRIVATE_KEY_PASSWORD! // manually from CLI
   );
+  wallet = wallet.connect(provider);
 
   // console.log('Standard way to deploy');
   const abi = fs.readFileSync('SimpleStorage_sol_SimpleStorage.abi', 'utf8');
@@ -38,8 +39,15 @@ const main = async () => {
 
   const currentFavouriteNumber: ethers.BigNumber = await contract.retrieve();
   console.log(`Favourite Number: ${currentFavouriteNumber.toString()}`);
+  console.log('Storing 3 as new favourite number...');
+  const transRes = await contract.store('3');
+  await transRes.wait(1);
+  const updatedFavouriteNumber: ethers.BigNumber = await contract.retrieve();
+  console.log(`New Fav number: ${updatedFavouriteNumber.toString()}`);
 };
 
+// Run: PRIVATE_KEY=*** PRIVATE_KEY_PASSWORD=*** ts-node encryptKey.ts
+// Run: PRIVATE_KEY_PASSWORD=*** ts-node deploy.ts
 main()
   .then(() => process.exit(0))
   .catch((err) => {
