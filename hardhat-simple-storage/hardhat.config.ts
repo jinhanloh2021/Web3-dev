@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import '@nomicfoundation/hardhat-toolbox';
 import 'dotenv/config';
+import '@nomiclabs/hardhat-etherscan';
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
@@ -12,6 +13,9 @@ const config: HardhatUserConfig = {
     },
   },
   solidity: '0.8.7',
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
+  },
 };
 
 export default config;
