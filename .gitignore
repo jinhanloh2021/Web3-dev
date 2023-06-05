@@ -4,3 +4,4 @@ SimpleStorage_sol_*
 .notes.md
 deploy.js
 .encryptedKey.json
+gas-report.txt

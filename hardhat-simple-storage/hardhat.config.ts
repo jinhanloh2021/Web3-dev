@@ -8,8 +8,8 @@ const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
   networks: {
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL!,
-      accounts: [process.env.SEPOLIA_PRIVATE_KEY!],
+      url: process.env.SEPOLIA_RPC_URL || '',
+      accounts: [process.env.SEPOLIA_PRIVATE_KEY || '0xkey'],
       chainId: 11155111,
     },
     localhost: {
@@ -20,7 +20,15 @@ const config: HardhatUserConfig = {
   },
   solidity: '0.8.7',
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.ETHERSCAN_API_KEY || 'Key',
+  },
+  gasReporter: {
+    enabled: false,
+    outputFile: 'gas-report.txt',
+    noColors: true,
+    currency: 'USD',
+    coinmarketcap: process.env.COINMARKETCAP_API_KEY || 'Key',
+    token: 'ETH',
   },
 };
 
