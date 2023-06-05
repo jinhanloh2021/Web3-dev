@@ -1,22 +1,17 @@
 import { ethers } from 'hardhat';
+import { SimpleStorage } from '../typechain-types';
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  // Hardhat provides wallet, private key, network url. Don't have to manually create.
 
-  const lockedAmount = ethers.utils.parseEther('0.001');
-
-  const Lock = await ethers.getContractFactory('Lock');
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with ${ethers.utils.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+  const SimpleStorageFactory = await ethers.getContractFactory('SimpleStorage');
+  console.log('Deploying contract...');
+  const simpleStorage: SimpleStorage = await SimpleStorageFactory.deploy();
+  await simpleStorage.deployed();
+  console.log(`Deployed contract to: ${simpleStorage.address}`);
 }
+
+async function verify(contractAddress: string, args: any) {}
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
