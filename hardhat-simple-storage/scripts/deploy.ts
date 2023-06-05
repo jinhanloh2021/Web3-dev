@@ -1,5 +1,6 @@
 import { ethers, run, network } from 'hardhat';
 import { SimpleStorage } from '../typechain-types';
+import { BigNumber } from 'ethers';
 
 async function main() {
   // Hardhat provides wallet, private key, network url. Don't have to manually create.
@@ -20,6 +21,14 @@ async function main() {
     await simpleStorage.deployTransaction.wait(6);
     await verify(simpleStorage.address, []);
   }
+
+  const currentValue: BigNumber = await simpleStorage.retrieve();
+  console.log(`Current stored value: ${currentValue.toString()}`);
+
+  const transactionRes = await simpleStorage.store(BigNumber.from(42));
+  await transactionRes.wait(1);
+  const updatedValue: BigNumber = await simpleStorage.retrieve();
+  console.log(`Updated stored value: ${updatedValue}`);
 }
 
 async function verify(contractAddress: string, args: any[]) {
