@@ -1,10 +1,15 @@
+/**
+ * When command "yarn hardhat deploy" is run, by default it is run on the hardhat network which is
+ * a development network. Hardhat-deploy package will choose run the deploy scripts in alphabetical
+ * order, so 00-deploy-mocks run first, and it checks if network is dev before deploying mocks.
+ */
+
 import { network } from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
   DECIMALS,
   INITIAL_ANSWER,
   developmentChains,
-  networkConfig,
 } from '../helper-hardhat-config';
 import { DeployFunction } from 'hardhat-deploy/dist/types';
 
@@ -13,10 +18,11 @@ const deployMocks: DeployFunction = async ({
   deployments,
 }: HardhatRuntimeEnvironment) => {
   const { deploy, log } = deployments;
-  const { deployer } = await getNamedAccounts();
-  const chainId = network.config.chainId ?? 0;
+  const { deployer /*, user */ } = await getNamedAccounts(); // named accounts in hardhat.config
 
-  if (developmentChains.includes(networkConfig[chainId].name)) {
+  log('------------------00-deploy-mocks.ts------------------');
+  if (developmentChains.includes(network.name)) {
+    // in dev
     log('Local network detected. Deploying mocks...');
     await deploy('MockV3Aggregator', {
       contract: 'MockV3Aggregator',
@@ -25,7 +31,9 @@ const deployMocks: DeployFunction = async ({
       args: [DECIMALS, INITIAL_ANSWER],
     });
     log('Mocks deployed');
-    log('----------------------------------------------------');
+    log('------------------------------------------------------');
+  } else {
+    log('Testnet or Mainnet detected, skipping mocks...');
   }
 };
 deployMocks.tags = ['all', 'mocks'];
