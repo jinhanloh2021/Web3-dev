@@ -1,7 +1,13 @@
 import { network } from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { developmentChains, networkConfig } from '../helper-hardhat-config';
-import { DeployFunction, DeployResult, Deployment } from 'hardhat-deploy/dist/types';
+import 'dotenv/config';
+import {
+  DeployFunction,
+  DeployResult,
+  Deployment,
+} from 'hardhat-deploy/dist/types';
+import verify from '../utils/verify';
 
 const deployFundMe: DeployFunction = async ({
   getNamedAccounts,
@@ -28,7 +34,17 @@ const deployFundMe: DeployFunction = async ({
     from: deployer,
     args: [ethUsdPriceFeedAddress], // put price feed address
     log: true,
+    waitConfirmations:
+      networkConfig[network.config.chainId ?? 0].blockConfirmations,
   });
+  if (
+    // if test/main net
+    !developmentChains.includes(network.name) &&
+    process.env.ETHERSCAN_API_KEY
+  ) {
+    // verify contract
+    await verify(fundMe.address, [ethUsdPriceFeedAddress]);
+  }
   log('-------------------------------------------------------');
 };
 
