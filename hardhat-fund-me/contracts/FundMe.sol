@@ -7,34 +7,30 @@ import "./PriceConverter.sol";
 contract FundMe {
   using PriceConverter for uint256;
 
-  mapping(address => uint256) public s_addressToAmountFunded;
+  mapping(address => uint256) public addressToAmountFunded;
   address[] public s_funders;
-  address public s_owner;
-  AggregatorV3Interface public s_priceFeed;
+  address public owner;
+  AggregatorV3Interface public priceFeed;
 
-  constructor(address priceFeed) {
-    s_priceFeed = AggregatorV3Interface(priceFeed);
-    s_owner = msg.sender;
+  constructor(address _priceFeed) {
+    priceFeed = AggregatorV3Interface(_priceFeed);
+    owner = msg.sender;
+  }
+
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
   }
 
   function fund() public payable {
     uint256 minimumUSD = 50 * 10**18;
     require(
-      msg.value.getConversionRate(s_priceFeed) >= minimumUSD,
+      msg.value.getConversionRate(priceFeed) >= minimumUSD,
       "You need to spend more ETH!"
     );
     // require(PriceConverter.getConversionRate(msg.value) >= minimumUSD, "You need to spend more ETH!");
-    s_addressToAmountFunded[msg.sender] += msg.value;
+    addressToAmountFunded[msg.sender] += msg.value;
     s_funders.push(msg.sender);
-  }
-
-  function getVersion() public view returns (uint256) {
-    return s_priceFeed.version();
-  }
-
-  modifier onlyOwner() {
-    require(msg.sender == s_owner);
-    _;
   }
 
   function withdraw() public payable onlyOwner {
@@ -45,7 +41,7 @@ contract FundMe {
       funderIndex++
     ) {
       address funder = s_funders[funderIndex];
-      s_addressToAmountFunded[funder] = 0;
+      addressToAmountFunded[funder] = 0;
     }
     s_funders = new address[](0);
   }
@@ -56,7 +52,7 @@ contract FundMe {
     // mappings can't be in memory, sorry!
     for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
       address funder = funders[funderIndex];
-      s_addressToAmountFunded[funder] = 0;
+      addressToAmountFunded[funder] = 0;
     }
     s_funders = new address[](0);
   }
