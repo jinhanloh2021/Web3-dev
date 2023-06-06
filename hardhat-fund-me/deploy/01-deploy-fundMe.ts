@@ -27,7 +27,7 @@ const deployFundMe: DeployFunction = async ({
     args: [ethUsdPriceFeedAddress], // put price feed address
     log: true,
   });
-  log('---------------------------------------------------');
+  log('----------------------------------------------------');
 };
 
 deployFundMe.tags = ['all', 'fundMe'];

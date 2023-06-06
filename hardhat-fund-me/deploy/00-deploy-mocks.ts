@@ -25,7 +25,7 @@ const deployMocks: DeployFunction = async ({
       args: [DECIMALS, INITIAL_ANSWER],
     });
     log('Mocks deployed');
-    log('---------------------------------------------------');
+    log('----------------------------------------------------');
   }
 };
 deployMocks.tags = ['all', 'mocks'];
