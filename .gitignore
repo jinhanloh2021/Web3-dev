@@ -5,3 +5,15 @@ SimpleStorage_sol_*
 deploy.js
 .encryptedKey.json
 gas-report.txt
+
+coverage
+coverage.json
+typechain
+typechain-types
+deployments
+.solhint.json
+.solhintignore
+README.md
+
+cache
+artifacts
