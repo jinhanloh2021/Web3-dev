@@ -8,6 +8,8 @@ import './PriceConverter.sol';
 
 // Error codes
 error FundMe__NotOwner();
+error FundMe__NotEnoughFunds();
+error FundMe__WithdrawError();
 
 /**
  * @title A contract for crows funding
@@ -50,11 +52,9 @@ contract FundMe {
    * @dev This implements price feeds as our library
    */
   function fund() public payable {
-    require(
-      msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
-      'You need to spend more ETH!'
-    );
-    // require(PriceConverter.getConversionRate(msg.value) >= minimumUSD, "You need to spend more ETH!");
+    if (msg.value.getConversionRate(s_priceFeed) < MINIMUM_USD) {
+      revert FundMe__NotEnoughFunds();
+    } // reverts cost less gas than require
     s_addressToAmountFunded[msg.sender] += msg.value;
     s_funders.push(msg.sender);
   }
@@ -80,7 +80,9 @@ contract FundMe {
     }
     s_funders = new address[](0);
     (bool success, ) = i_owner.call{value: address(this).balance}('');
-    require(success);
+    if (!success) {
+      revert FundMe__WithdrawError();
+    }
   }
 
   function getOwner() public view returns (address) {

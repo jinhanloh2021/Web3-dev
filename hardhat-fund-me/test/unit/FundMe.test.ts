@@ -32,8 +32,9 @@ describe('FundMe', () => {
 
   describe('fund', async () => {
     it('Fails if not enough ETH sent', async () => {
-      await expect(fundMe.fund()).to.be.revertedWith(
-        'You need to spend more ETH!'
+      await expect(fundMe.fund()).to.be.revertedWithCustomError(
+        fundMe,
+        'FundMe__NotEnoughFunds'
       ); // expects fund() to revert if not enough eth
     });
     it('Updates the amount funded data structure', async () => {
