@@ -24,7 +24,7 @@ describe('FundMe', () => {
 
   describe('constructor', () => {
     it('Sets aggregator addresses correctly', async () => {
-      const res_priceFeed_Address = await fundMe.s_priceFeed();
+      const res_priceFeed_Address = await fundMe.getPriceFeed();
       const expected_priceFeed_Address = mockV3Aggregator.address;
       assert.equal(res_priceFeed_Address, expected_priceFeed_Address);
     });
@@ -38,7 +38,7 @@ describe('FundMe', () => {
     });
     it('Updates the amount funded data structure', async () => {
       await fundMe.fund({ value: sendValue });
-      const res = await fundMe.s_addressToAmountFunded(deployer);
+      const res = await fundMe.getAddressToAmountFunded(deployer);
       assert.equal(
         res.toString(),
         BigNumber.from((1e18).toString()).toString()
@@ -46,7 +46,7 @@ describe('FundMe', () => {
     });
     it('Adds funders to array of funders', async () => {
       await fundMe.fund({ value: sendValue });
-      const resFunder = await fundMe.s_funders(0);
+      const resFunder = await fundMe.getFunder(0);
       assert.equal(resFunder, deployer);
     });
   });
@@ -101,11 +101,11 @@ describe('FundMe', () => {
         startFundMeBalance.add(startDeployerBalance).toString(),
         endDeployerBalance.add(gasUsed.mul(effectiveGasPrice)).toString()
       );
-      await expect(fundMe.s_funders(BigNumber.from(0))).to.be.reverted;
+      await expect(fundMe.getFunder(BigNumber.from(0))).to.be.reverted;
       for (let i = 1; i < 6; i++) {
         assert.equal(
           (
-            await fundMe.s_addressToAmountFunded(accounts[i].address)
+            await fundMe.getAddressToAmountFunded(accounts[i].address)
           ).toString(),
           BigNumber.from(0).toString()
         );
@@ -168,11 +168,11 @@ describe('FundMe', () => {
         startFundMeBalance.add(startDeployerBalance).toString(),
         endDeployerBalance.add(gasUsed.mul(effectiveGasPrice)).toString()
       );
-      await expect(fundMe.s_funders(BigNumber.from(0))).to.be.reverted;
+      await expect(fundMe.getFunder(BigNumber.from(0))).to.be.reverted;
       for (let i = 1; i < 6; i++) {
         assert.equal(
           (
-            await fundMe.s_addressToAmountFunded(accounts[i].address)
+            await fundMe.getAddressToAmountFunded(accounts[i].address)
           ).toString(),
           BigNumber.from(0).toString()
         );
