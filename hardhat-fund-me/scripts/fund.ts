@@ -14,7 +14,7 @@ async function main() {
   console.log(`Got contract FundMe at ${fundMe.address}`);
   console.log('Funding contract...');
   const transactionResponse = await fundMe.fund({
-    value: BigNumber.from('0.05'),
+    value: BigNumber.from((5e16).toString()),
   });
   await transactionResponse.wait();
   console.log('Funded!');
