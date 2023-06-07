@@ -1,4 +1,7 @@
 {
+  "name": "hardhat-fund-me",
+  "version": "1.0.0",
+  "license": "MIT",
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",
     "@ethersproject/abi": "^5.4.7",
