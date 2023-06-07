@@ -96,9 +96,6 @@ describe('FundMe', () => {
       // Assert
       const endFundMeBalance = await fundMe.provider.getBalance(fundMe.address);
       const endDeployerBalance = await fundMe.provider.getBalance(deployer);
-      // console.log(
-      //   `Start FundMe: ${startFundMeBalance}\nStart Deploy: ${startDeployerBalance}\nEnd FundMe: ${endFundMeBalance}\nEnd Deploy: ${endDeployerBalance}\n`
-      // );
       assert.equal(endFundMeBalance.toString(), BigNumber.from(0).toString());
       assert.equal(
         startFundMeBalance.add(startDeployerBalance).toString(),
@@ -111,6 +108,28 @@ describe('FundMe', () => {
           BigNumber.from(0).toString()
         );
       }
+    });
+
+    it('Only allows owner to withdraw funds', async () => {
+      const accounts: SignerWithAddress[] = await ethers.getSigners();
+      const attacker = accounts[1]; // non deployer, should not be able to withdraw
+      await expect(
+        fundMe.connect(attacker).withdraw()
+      ).to.be.revertedWithCustomError(fundMe, 'FundMe__NotOwner');
+    });
+  });
+
+  describe('receive', async () => {
+    it('should fund contract when receiving ETH', async () => {
+      const startBalance = await ethers.provider.getBalance(fundMe.address);
+      const deployerSigner = ethers.provider.getSigner(deployer);
+      await deployerSigner.sendTransaction({
+        to: fundMe.address,
+        value: sendValue,
+      });
+      const endBalance = await ethers.provider.getBalance(fundMe.address);
+      const expectedEndBalance = startBalance.add(sendValue);
+      assert.equal(endBalance.toString(), expectedEndBalance.toString());
     });
   });
 });
