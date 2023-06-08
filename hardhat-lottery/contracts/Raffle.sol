@@ -21,13 +21,14 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint25
  * @dev This implements chainlink VRFv2 and chainlink keepers
  */
 
-contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
+contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and Keeper, hence extend these two contracts
     /** Type declarations */
     enum RaffleState {
         /** Behind the scenes, it is uint256 0 = Open, 1 = Calculating */
         OPEN,
         CALCULATING
     }
+
     /** State variables */
     uint256 private immutable i_entranceFee;
     address payable[] private s_players;
@@ -42,14 +43,25 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
     address private s_recentWinner;
     RaffleState private s_raffleState;
     uint256 private s_lastTimeStamp;
-    uint256 private i_interval;
+    uint256 private immutable i_interval;
 
     /** Events */
     event RaffleEnter(address indexed player);
     event RequestedRaffleWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winner);
 
-    constructor(address _vrfCoordinatorV2, uint256 _entranceFee, bytes32 _gasLane, uint64 _subscriptionId, uint32 _callbackGasLimit, uint256 _interval) VRFConsumerBaseV2(_vrfCoordinatorV2){
+    /** Functions */
+
+    /**
+     * @notice Constructor inherits VRFConsumerBaseV2
+     * @param _vrfCoordinatorV2 - coordinator, check https://docs.chain.link/docs/vrf-contracts/#configurations
+     * @param _entranceFee - fee for participating in the lottery
+     * @param _gasLane - the gas lane to use, which specifies the maximum gas price to bump to
+     * @param _subscriptionId - the subscription ID that this contract uses for funding requests
+     * @param _callbackGasLimit - gas limit for callback in fulfillRandomWords()
+     * @param _interval - time interval between each lottery winner
+     */
+    constructor(address _vrfCoordinatorV2 /** contract */, uint256 _entranceFee, bytes32 _gasLane, uint64 _subscriptionId, uint32 _callbackGasLimit, uint256 _interval) VRFConsumerBaseV2(_vrfCoordinatorV2){
         i_entranceFee = _entranceFee;
         i_vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinatorV2);
         i_gasLane = _gasLane;
@@ -73,7 +85,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
     }
 
     /**
-     * @dev This is the function that the chainlink keeper nodes call 
+     * @notice checkUpKeep and performUpkeep overrides virtual functions in KeeperCompatibleInterface
+     * @dev This is the function that the chainlink keeper nodes call
      * They look for the `upKeepNeeded` to return true
      * The following should be true in order to return true
      * 1. Our time interval should have passed
@@ -91,6 +104,9 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
         return (upkeepNeeded, "0x0");
     }
 
+    /**
+     * @notice Checks if all conditions met, then requests randomness. Also known as requestRandomWords()
+     */
     function performUpkeep(bytes calldata /** performData */) external override{
         // Request random number - 2 step process
         // Do something with number
@@ -109,6 +125,10 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
         emit RequestedRaffleWinner(requestId);
     }
 
+    /**
+     * @notice Has access to the random number. Proceeds with selecting winner, paying out and contract state
+     * @param randomWords - first element is verifiably random number that was requested
+     */
     function fulfillRandomWords(uint256, uint256[] memory randomWords) internal override {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
