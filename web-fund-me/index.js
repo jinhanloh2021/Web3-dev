@@ -3,8 +3,12 @@ import { abi, fundMeAddress } from './constants.js';
 
 const connectButton = document.getElementById('connectButton');
 const fundButton = document.getElementById('fundButton');
+const balanceButton = document.getElementById('balanceButton');
+const withdrawButton = document.getElementById('withdrawButton');
 connectButton.onclick = connect;
 fundButton.onclick = fund;
+balanceButton.onclick = getBalance;
+withdrawButton.onclick = withdrawFunds;
 
 console.log(ethers);
 
@@ -27,9 +31,17 @@ async function connect() {
  */
 
 // fund
-async function fund(ethAmount) {
-  ethAmount = BigNumber.from((1e18).toString());
-  console.log(`Funding with ${ethAmount}`);
+async function fund() {
+  // const ethAmount = BigNumber.from((1e10).toString()).mul(
+  //   BigNumber.from(parseFloat(document.getElementById('ethAmount').value) * 1e8)
+  // );
+  console.log(document.getElementById('ethAmount').value);
+  console.log(typeof document.getElementById('ethAmount').value);
+  const ethAmount = ethers.utils.parseUnits(
+    document.getElementById('ethAmount').value,
+    18
+  );
+  console.log(`Funding with ${ethAmount.toString()}`);
   if (typeof window.ethereum !== 'undefined') {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -55,4 +67,28 @@ function listenForTransactionMine(transRes, provider) {
     });
   });
 }
+
+async function getBalance() {
+  if (typeof window.ethereum != 'undefined') {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = await provider.getBalance(fundMeAddress);
+    console.log(ethers.utils.formatEther(balance));
+  }
+}
+
 // withdraw
+async function withdrawFunds() {
+  if (typeof window.ethereum != 'undefined') {
+    console.log('Withdrawing');
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(fundMeAddress, abi, signer);
+
+    try {
+      const transRes = await contract.withdraw();
+      await listenForTransactionMine(transRes, provider);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+}
