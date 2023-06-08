@@ -14,6 +14,13 @@ error Raffle__TransferFailed();
 error Raffle__NotOpen();
 error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 
+/**
+ * @title A sample raffle contract
+ * @author Jin
+ * @notice This contract is for creating an untamperable decentralised lottery
+ * @dev This implements chainlink VRFv2 and chainlink keepers
+ */
+
 contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
     /** Type declarations */
     enum RaffleState {
@@ -117,6 +124,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
         emit WinnerPicked(recentWinner);
     }
 
+    /** View/Pure functions */
     function getEntranceFee() public view returns(uint256) {
         return i_entranceFee;
     }
@@ -127,5 +135,25 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{
 
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
+    }
+
+    function getRaffleState() public view returns (RaffleState) {
+        return s_raffleState;
+    }
+
+    function getNumWords() public pure returns (uint8) {
+        return NUM_WORDS; // reads from bytecode, not storage, so pure function
+    }
+
+    function getNumPlayers() public view returns (uint256) {
+        return s_players.length;
+    }
+
+    function getLatestTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    function getRequestConfirmations() public pure returns (uint8) {
+        return REQUEST_CONFIRMATIONS;
     }
 }
