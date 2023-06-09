@@ -36,8 +36,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
     bytes32 private immutable i_gasLane;
     uint64 private immutable i_subscriptionId;
     uint32 private immutable i_callbackGasLimit;
-    uint8 private constant REQUEST_CONFIRMATIONS = 3;
-    uint8 private constant NUM_WORDS = 1;
+    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint32 private constant NUM_WORDS = 1;
 
     /** Lottery variables */
     address private s_recentWinner;
@@ -161,7 +161,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
         return s_raffleState;
     }
 
-    function getNumWords() public pure returns (uint8) {
+    function getNumWords() public pure returns (uint32) {
         return NUM_WORDS; // reads from bytecode, not storage, so pure function
     }
 
@@ -173,11 +173,15 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
         return s_lastTimeStamp;
     }
 
-    function getRequestConfirmations() public pure returns (uint8) {
+    function getRequestConfirmations() public pure returns (uint16) {
         return REQUEST_CONFIRMATIONS;
     }
 
     function getInterval() public view returns (uint256) {
         return i_interval;
+    }
+
+    function getSubid() public view returns (uint64){
+        return i_subscriptionId;
     }
 }
