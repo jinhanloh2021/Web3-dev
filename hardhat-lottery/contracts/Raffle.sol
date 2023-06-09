@@ -176,4 +176,8 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
     function getRequestConfirmations() public pure returns (uint8) {
         return REQUEST_CONFIRMATIONS;
     }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
+    }
 }
