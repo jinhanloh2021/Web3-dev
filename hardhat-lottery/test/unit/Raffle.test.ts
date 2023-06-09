@@ -78,4 +78,46 @@ import { Raffle, VRFCoordinatorV2Mock } from '../../typechain-types';
           ).to.be.revertedWithCustomError(raffle, 'Raffle__NotOpen');
         });
       });
+
+      describe('checkUpkeep', () => {
+        it('Returns false if contract has no ETH', async () => {
+          await network.provider.send('evm_increaseTime', [
+            interval.toNumber() + 1,
+          ]);
+          await network.provider.send('evm_mine', []);
+          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep('0x');
+          assert(!upkeepNeeded);
+        });
+
+        it('Returns false if raffle is not open', async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send('evm_increaseTime', [
+            interval.toNumber() + 1,
+          ]);
+          await network.provider.send('evm_mine', []);
+          await raffle.performUpkeep([]);
+          const raffleState = await raffle.getRaffleState();
+          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep('0x');
+          assert.equal(raffleState.toString(), '1');
+          assert.equal(upkeepNeeded, false);
+        });
+
+        it('Returns false if enough time has not passed', async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send('evm_mine', []);
+          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep('0x');
+          console.log(upkeepNeeded);
+          assert(!upkeepNeeded);
+        });
+
+        it('Returns true if enough time passed, has players, enough eth, and is open', async () => {
+          await raffle.enterRaffle({ value: raffleEntranceFee });
+          await network.provider.send('evm_increaseTime', [
+            interval.toNumber() - 1,
+          ]);
+          await network.provider.send('evm_mine', []);
+          const { upkeepNeeded } = await raffle.callStatic.checkUpkeep('0x');
+          assert(upkeepNeeded);
+        });
+      });
     });
