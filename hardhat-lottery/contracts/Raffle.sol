@@ -94,7 +94,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
      * 3. Our subscription is funded with Link
      * 4. Lottery should be in an open state
      */
-    function checkUpkeep(bytes memory /** checkdata */) public override returns (bool upkeepNeeded, bytes memory /** perform data */){
+    function checkUpkeep(bytes memory /** checkdata */) public view override returns (bool upkeepNeeded, bytes memory /** perform data */){
         bool isOpen = RaffleState.OPEN == s_raffleState;
         bool timePassed = (block.timestamp - s_lastTimeStamp) > i_interval; // check time interval has passed
         bool hasPlayers = s_players.length > 0;
@@ -106,10 +106,11 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
 
     /**
      * @notice Checks if all conditions met, then requests randomness. Also known as requestRandomWords()
+     * 2 Step Proccess
+     * - Request random number requestRandomWords()
+     * - Do something with random number fulfillRandomWords()
      */
     function performUpkeep(bytes calldata /** performData */) external override{
-        // Request random number - 2 step process
-        // Do something with number
         (bool upkeepNeeded, ) = checkUpkeep("");
         if(!upkeepNeeded) {
             revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
@@ -126,7 +127,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
     }
 
     /**
-     * @notice Has access to the random number. Proceeds with selecting winner, paying out and contract state
+     * @notice Has access to the random number. Proceeds with selecting winner, paying out and reset contract state
      * @param randomWords - first element is verifiably random number that was requested
      */
     function fulfillRandomWords(uint256, uint256[] memory randomWords) internal override {
@@ -179,9 +180,5 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface{ // need VRF and
 
     function getInterval() public view returns (uint256) {
         return i_interval;
-    }
-
-    function getSubid() public view returns (uint64){
-        return i_subscriptionId;
     }
 }
