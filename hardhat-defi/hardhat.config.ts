@@ -5,11 +5,20 @@ import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-deploy';
 
 const config: HardhatUserConfig = {
-  solidity: '0.8.7',
+  solidity: {
+    compilers: [
+      { version: '0.8.7' },
+      { version: '0.6.6' },
+      { version: '0.4.19' },
+    ],
+  },
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       chainId: 31337,
+      forking: {
+        url: process.env.MAINNET_RPC_URL!,
+      },
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || '',
