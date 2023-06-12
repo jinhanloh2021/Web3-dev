@@ -52,6 +52,25 @@ const main = async () => {
   );
 
   await getBorrowUserData(lendingPool, deployer);
+  await repay(
+    amountDaiToBorrowWei,
+    '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    lendingPool,
+    deployer
+  );
+  await getBorrowUserData(lendingPool, deployer);
+};
+
+const repay = async (
+  amount: BigNumber,
+  DAIAddress: string,
+  lendingPool: ILendingPool,
+  account: string
+) => {
+  await approveERC20(DAIAddress, lendingPool.address, amount, account);
+  const repayTx = await lendingPool.repay(DAIAddress, amount, 1, account);
+  await repayTx.wait(1);
+  console.log(`Repaid ${amount}`);
 };
 
 const borrowDAI = async (
