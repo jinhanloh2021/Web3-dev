@@ -1,3 +1,5 @@
+import { ethers } from 'hardhat';
+
 export interface networkConfigItem {
   name?: string;
   subscriptionId?: string;
@@ -33,11 +35,12 @@ export const networkConfig: networkConfigInfo = {
       '0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c',
     callbackGasLimit: '500000', // 500,000 gas
     mintFee: '10000000000000000', // 0.01 ETH
-    subscriptionId: '1002', // add your ID here!
+    subscriptionId: '2708', // add your ID here!
   },
 };
 
 export const DECIMALS = '18';
+export const VRF_SUBSCRIPTION_FUND_AMOUNT = ethers.utils.parseEther('2');
 export const INITIAL_PRICE = '200000000000000000000';
 export const developmentChains = ['hardhat', 'localhost'];
 export const VERIFICATION_BLOCK_CONFIRMATIONS = 6;
