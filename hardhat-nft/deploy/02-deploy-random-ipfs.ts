@@ -15,7 +15,7 @@ import {
   storeTokenUriMetadata,
   iMetadata,
 } from '../utils/uploadToPinata';
-import { DeployFunction } from 'hardhat-deploy/dist/types';
+import { DeployFunction, DeployResult } from 'hardhat-deploy/dist/types';
 
 const IMAGES_LOCATION = './images/randomNft/';
 
@@ -29,13 +29,19 @@ const deployBasicNft: DeployFunction = async ({
   let vrfCoordinatorV2Mock: VRFCoordinatorV2Mock | any,
     vrfCoordinatorV2Address: string,
     subscriptionId: BigNumber,
-    dogTokenUris: string[] = [];
+    dogTokenUris: string[] = [
+      'ipfs://QmcwKUpgzsJajzpB641PcjNwhvCfVTyi47kKUaJoU7fU4C',
+      'ipfs://QmRPzSPxYXUQChAhU2rfwWdEskUfMteGe1u9EsVY5RFZSs',
+      'ipfs://QmNuQjno6Fi5HdA1itzpKTVW7y4izYPZ2n6SjBgYo41nu6',
+    ],
+    waitConfirmations = VERIFICATION_BLOCK_CONFIRMATIONS;
 
   log('-----------------02-deploy-randomIpfs.ts------------------');
   // on development chain, get address from deployed mock
   if (developmentChains.includes(network.name)) {
     vrfCoordinatorV2Mock = await ethers.getContract('VRFCoordinatorV2Mock');
     vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
+    waitConfirmations = 1;
 
     const transRes = await vrfCoordinatorV2Mock.createSubscription();
     const transReceipt = await transRes.wait(1);
@@ -57,8 +63,8 @@ const deployBasicNft: DeployFunction = async ({
 
   if (process.env.UPLOAD_TO_PINATA == 'true') {
     dogTokenUris = await handleTokenUris();
+    log('-'.repeat(54));
   }
-  log('-'.repeat(54));
   const args = [
     vrfCoordinatorV2Address,
     subscriptionId,
@@ -68,12 +74,25 @@ const deployBasicNft: DeployFunction = async ({
     networkConfig[chainId].mintFee,
   ];
 
-  // const randomIpfsNft = await deploy('RandomIpfsNft', {
-  //   from: deployer,
-  //   args: args,
-  //   log: true,
-  //   waitConfirmations: VERIFICATION_BLOCK_CONFIRMATIONS,
-  // });
+  const randomIpfsNft: DeployResult = await deploy('RandomIpfsNft', {
+    from: deployer,
+    args: args,
+    log: true,
+    waitConfirmations: waitConfirmations,
+  });
+  log('Raffle smart contract deployed');
+  log('-'.repeat(54));
+
+  // Verify contract if on testnet/mainnet
+  if (
+    !developmentChains.includes(network.name) &&
+    process.env.ETHERSCAN_API_KEY
+  ) {
+    log('Verifying contract...');
+    await verify(randomIpfsNft.address, args);
+    log(`Contract ${randomIpfsNft.address} verified`);
+    log('-'.repeat(54));
+  }
 };
 
 const handleTokenUris = async (): Promise<string[]> => {
