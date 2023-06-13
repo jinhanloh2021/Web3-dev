@@ -16,11 +16,12 @@ const deployBasicNft = async ({
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS;
+  const args: any[] = [];
 
   log('-'.repeat(54));
   const basicNft = await deploy('BasicNft', {
     from: deployer,
-    args: [],
+    args: args,
     log: true,
     waitConfirmations: waitBlockConfirmations,
   });
@@ -40,3 +41,4 @@ const deployBasicNft = async ({
 };
 
 export default deployBasicNft;
+deployBasicNft.tags = ['all', 'BasicNft', 'main']; // have to add tags to be called by Fixture([])
