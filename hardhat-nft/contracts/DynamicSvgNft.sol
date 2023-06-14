@@ -5,6 +5,8 @@ import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 import 'base64-sol/base64.sol';
 
+error DynamicSvgNft__TokenNotFound(uint256 tokenId);
+
 contract DynamicSvgNft is ERC721 {
   /**
    * mint
@@ -35,17 +37,15 @@ contract DynamicSvgNft is ERC721 {
   function svgToImageURI(
     string memory svg
   ) private pure returns (string memory) {
-    string memory svgBase64Encoded = Base64.encode(
-      bytes(string(abi.encodePacked(svg)))
-    );
+    string memory svgBase64Encoded = Base64.encode((abi.encodePacked(svg)));
     return string(abi.encodePacked(base64EncodedSvgPrefix, svgBase64Encoded));
   }
 
   function mintNft(int256 highValue) public {
     s_tokenIdToHighValue[s_tokenCounter] = highValue;
-    s_tokenCounter += 1;
     _safeMint(msg.sender, s_tokenCounter);
     emit CreatedNFT(s_tokenCounter, highValue);
+    s_tokenCounter += 1;
   }
 
   function _baseURI() internal pure override returns (string memory) {
@@ -55,28 +55,27 @@ contract DynamicSvgNft is ERC721 {
   function tokenURI(
     uint256 tokenId
   ) public view override returns (string memory) {
-    require(_exists(tokenId), 'URI query for non existent token');
+    if (!_exists(tokenId)) {
+      revert DynamicSvgNft__TokenNotFound(tokenId);
+    }
     (, int256 price, , , ) = i_priceFeed.latestRoundData();
     string memory imageUri = i_lowImageUri;
     if (price >= s_tokenIdToHighValue[tokenId]) {
       imageUri = i_highImageUri;
     }
 
-    // concatanate strings
     return
-      string(
+      string( // cast to string
         abi.encodePacked(
           _baseURI(),
-          Base64.encode(
-            bytes(
-              abi.encodePacked(
-                '{"name":"',
-                name(), // You can add whatever name here
-                '", "description":"An NFT that changes based on the Chainlink Feed", ',
-                '"attributes": [{"trait_type": "coolness", "value": 100}], "image":"',
-                imageUri,
-                '"}'
-              )
+          Base64.encode( // returns string
+            abi.encodePacked( // concats strings and returns bytes
+              '{"name":"',
+              name(), // You can add whatever name here
+              '", "description":"An NFT that changes based on the Chainlink Feed", ',
+              '"attributes": [{"trait_type": "coolness", "value": 100}], "image":"',
+              imageUri,
+              '"}'
             )
           )
         )
