@@ -17,7 +17,7 @@ import {
       let dynamicSvgNft: DynamicSvgNft,
         deployer: string,
         mockV3Aggregator: MockV3Aggregator;
-      const highValue = BigNumber.from((1e18).toString());
+      const highValue = BigNumber.from((8e18).toString());
 
       beforeEach(async () => {
         deployer = (await getNamedAccounts()).deployer;
@@ -80,18 +80,43 @@ import {
       });
 
       describe('tokenURI', () => {
+        // Arrange: Need low minter to mint with highValue below price feed
+        let currentPrice: BigNumber, tokenId: BigNumber;
         beforeEach(async () => {
-          // Arrange: person to mint NFT and update tokenCounter and high price
+          const { answer } = await mockV3Aggregator.latestRoundData();
+          currentPrice = answer;
+          tokenId = await dynamicSvgNft.getTokenCounter();
         });
 
         it('Reverts if tokenId non-existent', async () => {
-          const voidTokenId = BigNumber.from(10);
+          const voidTokenId = BigNumber.from(0);
           await expect(dynamicSvgNft.tokenURI(voidTokenId))
             .to.be.revertedWithCustomError(
               dynamicSvgNft,
               'DynamicSvgNft__TokenNotFound'
             )
             .withArgs(voidTokenId);
+        });
+
+        it('Returns lowTokenUri if highPrice less than price feed', async () => {
+          // Act: Mint nft with lower price. Call tokenURI to get URI for minted NFT.
+          await dynamicSvgNft.mintNft(currentPrice.sub(1));
+          const actualTokenUri = await dynamicSvgNft.tokenURI(tokenId);
+
+          // Assert: Check the actualTokenUri is the lowTokenUri
+          assert.equal(lowTokenUri, actualTokenUri);
+        });
+
+        it('Returns highTokenUri if highPrice greater than price feed', async () => {
+          await dynamicSvgNft.mintNft(currentPrice.add(1));
+          const actualTokenUri = await dynamicSvgNft.tokenURI(tokenId);
+          assert.equal(highTokenUri, actualTokenUri);
+        });
+
+        it('Returns highTokenUri if highPrice equals to price feed', async () => {
+          await dynamicSvgNft.mintNft(currentPrice);
+          const actualTokenUri = await dynamicSvgNft.tokenURI(tokenId);
+          assert.equal(highTokenUri, actualTokenUri);
         });
       });
     });

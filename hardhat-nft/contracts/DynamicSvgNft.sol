@@ -27,7 +27,7 @@ contract DynamicSvgNft is ERC721 {
     address priceFeedAddress,
     string memory lowSvg,
     string memory highSvg
-  ) ERC721('DynamicSvgNft', 'DSN') {
+  ) ERC721('Dynamic SVG NFT', 'DSN') {
     s_tokenCounter = 0;
     i_lowImageUri = svgToImageURI(lowSvg);
     i_highImageUri = svgToImageURI(highSvg);
@@ -41,6 +41,7 @@ contract DynamicSvgNft is ERC721 {
     return string(abi.encodePacked(base64EncodedSvgPrefix, svgBase64Encoded));
   }
 
+  // Should make payable
   function mintNft(int256 highValue) public {
     s_tokenIdToHighValue[s_tokenCounter] = highValue;
     _safeMint(msg.sender, s_tokenCounter);
@@ -49,7 +50,7 @@ contract DynamicSvgNft is ERC721 {
   }
 
   function _baseURI() internal pure override returns (string memory) {
-    return 'data:application/json;Base64';
+    return 'data:application/json;base64,';
   }
 
   function tokenURI(
@@ -60,7 +61,7 @@ contract DynamicSvgNft is ERC721 {
     }
     (, int256 price, , , ) = i_priceFeed.latestRoundData();
     string memory imageUri = i_lowImageUri;
-    if (price >= s_tokenIdToHighValue[tokenId]) {
+    if (price <= s_tokenIdToHighValue[tokenId]) {
       imageUri = i_highImageUri;
     }
 
