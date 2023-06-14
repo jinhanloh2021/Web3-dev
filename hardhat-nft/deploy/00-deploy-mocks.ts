@@ -1,6 +1,10 @@
 import { network } from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { developmentChains } from '../helper-hardhat-config';
+import {
+  DECIMALS,
+  INITIAL_PRICE,
+  developmentChains,
+} from '../helper-hardhat-config';
 import { ethers } from 'ethers';
 import { DeployFunction } from 'hardhat-deploy/dist/types';
 
@@ -23,6 +27,11 @@ const deployMocks: DeployFunction = async ({
       from: deployer,
       log: true,
       args: [BASE_FEE, GAS_PRICE_LINK],
+    });
+    await deploy('MockV3Aggregator', {
+      from: deployer,
+      log: true,
+      args: [DECIMALS, INITIAL_PRICE],
     });
     log('Mocks deployed');
     log('-'.repeat(54));

@@ -5,7 +5,9 @@ import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-deploy';
 
 const config: HardhatUserConfig = {
-  solidity: '0.8.7',
+  solidity: {
+    compilers: [{ version: '0.8.7' }, { version: '0.6.12' }],
+  },
   defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
