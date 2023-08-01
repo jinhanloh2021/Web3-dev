@@ -15,8 +15,8 @@ contract TimeLock is TimelockController {
    */
   constructor(
     uint256 minDelay,
-    address[] memory proposers,
-    address[] memory executors,
+    address[] memory proposers, // Set in 04-setup // Proposer should only be GovernorContract
+    address[] memory executors, // Anybody can execute
     address admin
   ) TimelockController(minDelay, proposers, executors, admin) {}
 }
