@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/dist/types';
 import { ethers } from 'hardhat';
+import { Box, TimeLock } from '../typechain-types';
 
 const deployBox: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -16,11 +17,10 @@ const deployBox: DeployFunction = async function (
     waitConfirmations: 1,
   });
 
-  const boxContract = await ethers.getContractAt('Box', box.address);
-  const timeLock = await ethers.getContractAt('TimeLock', deployer);
-  const transferOwnerTx = await boxContract.transferOwnership(
-    await timeLock.getAddress()
-  );
+  const boxContract: Box = await ethers.getContract('Box');
+  const timeLock: TimeLock = await ethers.getContractAt('TimeLock', deployer);
+  const transferOwnerTx = await boxContract.transferOwnership(timeLock.address);
+  await transferOwnerTx.wait(1);
   log('Done');
 };
 

@@ -1,9 +1,11 @@
 import { HardhatUserConfig } from 'hardhat/config';
-import '@nomicfoundation/hardhat-toolbox';
 import 'dotenv/config';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-ethers';
+import '@typechain/hardhat';
+import '@nomiclabs/hardhat-waffle';
 import 'hardhat-deploy';
+// import 'hardhat-deploy-ethers';
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -28,13 +30,6 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY || 'Key',
-  },
-  gasReporter: {
-    enabled: false,
-    currency: 'USD',
-    outputFile: 'gas-report.txt',
-    noColors: true,
-    // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },
   namedAccounts: {
     deployer: {

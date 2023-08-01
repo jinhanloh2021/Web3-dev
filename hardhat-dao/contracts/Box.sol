@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
 
+/** Owned by the DAO (GovernanceContract Account) */
 contract Box is Ownable {
   /** State variables */
   uint256 private s_value;
@@ -14,7 +15,8 @@ contract Box is Ownable {
 
   /**
    * @param _newValue the new value
-   * @notice emits the Value Changed event
+   * @notice emits the Value Changed event, only owner can call
+   * which is the DAO only can call this function
    */
   function store(uint256 _newValue) public onlyOwner {
     s_value = _newValue;
