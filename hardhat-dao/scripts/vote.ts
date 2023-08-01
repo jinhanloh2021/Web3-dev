@@ -5,7 +5,7 @@ import {
   proposalsFile,
 } from '../helper-hardhat-config';
 import * as fs from 'fs';
-import { Governor } from '../typechain-types';
+import { GovernorContract } from '../typechain-types';
 import { moveBlocks } from '../utils/move-blocks';
 
 const index = 0;
@@ -16,7 +16,9 @@ async function main(proposalIndex: number) {
   // 0 = against 1 = for 2 = abstain
   const voteWay = 1;
   const reason = 'I feel like it';
-  const governor: Governor = await ethers.getContract('GovernorContract');
+  const governor: GovernorContract = await ethers.getContract(
+    'GovernorContract'
+  );
   const voteTxResponse = await governor.castVoteWithReason(
     proposalId,
     voteWay,

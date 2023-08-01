@@ -25,3 +25,4 @@ const deployBox: DeployFunction = async function (
 };
 
 export default deployBox;
+deployBox.tags = ['all', 'box'];

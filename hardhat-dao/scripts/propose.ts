@@ -7,7 +7,7 @@ import {
   developmentChains,
   proposalsFile,
 } from '../helper-hardhat-config';
-import { Box, Governor } from '../typechain-types';
+import { GovernorContract } from '../typechain-types';
 import { moveBlocks } from '../utils/move-blocks';
 import * as fs from 'fs';
 
@@ -16,7 +16,9 @@ export async function propose(
   functionToCall: string,
   proposalDescription: string
 ) {
-  const governor: Governor = await ethers.getContract('GovernorContract');
+  const governor: GovernorContract = await ethers.getContract(
+    'GovernorContract'
+  );
   const box = await ethers.getContract('Box');
   const encodedFunctionCall = box.interface.encodeFunctionData(
     functionToCall,
@@ -31,16 +33,12 @@ export async function propose(
     proposalDescription
   );
   const proposalReceipt = await proposalTx.wait(1);
-  console.log(`Current network: ${network.name}`);
-  console.log(`Dev chains: ${developmentChains}`);
   if (developmentChains.includes(network.name)) {
     moveBlocks(VOTING_DELAY + 1);
-    console.log(`Blocks moved`);
   }
-  const proposalId =
-    proposalReceipt.events !== undefined
-      ? proposalReceipt.events[0].args?.proposalId
-      : -1;
+  const proposalId = proposalReceipt.events![0].args!.proposalId;
+
+  /** Write proposalId to JSON file */
   let proposals = JSON.parse(fs.readFileSync(proposalsFile, 'utf-8'));
   proposals[network.config.chainId!.toString()].push(proposalId.toString());
   fs.writeFileSync(proposalsFile, JSON.stringify(proposals));

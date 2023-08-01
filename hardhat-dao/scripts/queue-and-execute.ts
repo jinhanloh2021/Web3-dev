@@ -8,7 +8,7 @@ import {
 } from '../helper-hardhat-config';
 import { moveTime } from '../utils/move-time';
 import { moveBlocks } from '../utils/move-blocks';
-import { Box, Governor } from '../typechain-types';
+import { Box, GovernorContract } from '../typechain-types';
 import { BigNumber } from 'ethers';
 
 export async function queueAndExecute() {
@@ -22,7 +22,9 @@ export async function queueAndExecute() {
   const descriptionHash = ethers.utils.keccak256(
     ethers.utils.toUtf8Bytes(PROPOSAL_DESCRIPTION)
   );
-  const governor = await ethers.getContract('GovernorContract');
+  const governor: GovernorContract = await ethers.getContract(
+    'GovernorContract'
+  );
   console.log('Queueing...');
   const queueTx = await governor.queue(
     [box.address],

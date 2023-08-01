@@ -7,8 +7,8 @@ import { Governor, TimeLock } from '../typechain-types';
 const setupContracts: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ) {
-  const { getNamedAccounts, deployments, network } = hre;
-  const { deploy, log, get } = deployments;
+  const { getNamedAccounts, deployments } = hre;
+  const { log } = deployments;
   const { deployer } = await getNamedAccounts();
   const timeLock: TimeLock = await ethers.getContract('TimeLock');
   const governor: Governor = await ethers.getContract('GovernorContract');
@@ -17,9 +17,13 @@ const setupContracts: DeployFunction = async function (
   const executorRole = await timeLock.EXECUTOR_ROLE();
   const adminRole = await timeLock.TIMELOCK_ADMIN_ROLE();
 
-  await timeLock.grantRole(proposerRole, governor.address);
-  await timeLock.grantRole(executorRole, ADDRESS_ZERO);
-  await timeLock.revokeRole(adminRole, deployer);
+  const proposerTx = await timeLock.grantRole(proposerRole, governor.address);
+  await proposerTx.wait(1);
+  const executorTx = await timeLock.grantRole(executorRole, ADDRESS_ZERO);
+  await executorTx.wait(1);
+  const revokeTx = await timeLock.revokeRole(adminRole, deployer);
+  await revokeTx.wait(1);
 };
 
 export default setupContracts;
+setupContracts.tags = ['all', 'setup'];

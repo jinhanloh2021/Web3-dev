@@ -5,7 +5,7 @@ import { MIN_DELAY } from '../helper-hardhat-config';
 const deployTimelock: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ) {
-  const { getNamedAccounts, deployments, network } = hre;
+  const { getNamedAccounts, deployments } = hre;
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   log('Deploying timelock...');

@@ -9,7 +9,7 @@ import {
 const deployGovernorContract: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ) {
-  const { getNamedAccounts, deployments, network } = hre;
+  const { getNamedAccounts, deployments } = hre;
   const { deploy, log, get } = deployments;
   const { deployer } = await getNamedAccounts();
   const governanceToken = await get('GovernanceToken');
@@ -30,3 +30,4 @@ const deployGovernorContract: DeployFunction = async function (
 };
 
 export default deployGovernorContract;
+deployGovernorContract.tags = ['all', 'governor'];

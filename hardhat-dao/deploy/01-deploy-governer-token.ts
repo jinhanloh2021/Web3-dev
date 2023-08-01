@@ -18,14 +18,11 @@ const deployGovernanceToken: DeployFunction = async function (
   log(`Deployed governance token at: ${governanceToken.address}`);
   // verify on etherscan
 
-  await delegate(governanceToken.address, deployer);
+  await delegate(deployer);
   log('Delegated');
 };
 
-const delegate = async (
-  governanceTokenAddress: string,
-  delegatedAccount: string
-) => {
+const delegate = async (delegatedAccount: string) => {
   const governanceToken = await ethers.getContract('GovernanceToken');
   await governanceToken.delegate(delegatedAccount); // increases checkpoint by 1
   console.log(
