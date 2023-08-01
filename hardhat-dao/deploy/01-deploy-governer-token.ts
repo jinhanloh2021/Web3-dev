@@ -26,10 +26,7 @@ const delegate = async (
   governanceTokenAddress: string,
   delegatedAccount: string
 ) => {
-  const governanceToken = await ethers.getContractAt(
-    'GovernanceToken',
-    governanceTokenAddress
-  );
+  const governanceToken = await ethers.getContract('GovernanceToken');
   await governanceToken.delegate(delegatedAccount); // increases checkpoint by 1
   console.log(
     `Checkpoints: ${await governanceToken.numCheckpoints(delegatedAccount)}`

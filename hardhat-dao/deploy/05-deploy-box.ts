@@ -18,7 +18,7 @@ const deployBox: DeployFunction = async function (
   });
 
   const boxContract: Box = await ethers.getContract('Box');
-  const timeLock: TimeLock = await ethers.getContractAt('TimeLock', deployer);
+  const timeLock: TimeLock = await ethers.getContract('TimeLock');
   const transferOwnerTx = await boxContract.transferOwnership(timeLock.address);
   await transferOwnerTx.wait(1);
   log('Done');
